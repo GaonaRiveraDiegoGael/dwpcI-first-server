@@ -19,12 +19,15 @@ const server = http.createServer(async (req, res) => {
       res.write(`
       <html>
         <head>
-          <link rel="icon" type="image/x-icon" sizes="32x32" href="/favicon.ico">
           <title>My App</title>
         </head>
         <body> 
-          <h1 style="color: #333">Hello from my server</h1>
-          <p style="color: #34495E">Estás en el recurso raíz.</p>
+          <h1 style="color: #333">Enviar Mensaje</h1>
+          <form action="/message" method="POST">
+              <label for="message">Mensaje:</label>
+              <textarea id="message" name="message" required></textarea>
+              <button type="submit">Enviar</button>
+          </form>
         </body>
       </html>
       `);
@@ -33,56 +36,38 @@ const server = http.createServer(async (req, res) => {
       console.log(`📣 Respondiendo: 200 ${url} ${method}`);
       break;
 
-    case '/author':
-      // Petición a la ruta "/author"
-      res.setHeader('Content-Type', 'text/html');
-      let url_image = 'https://media.istockphoto.com/id/180841365/photo/hes-a-handsome-man.jpg?s=612x612&w=0&k=20&c=vjQLLI8g_a0O6_xx0plUu3CJ9AMhnSzHssLwgem8gE4=';
-      res.write(`
-      <html>
-        <head>
-          <link rel="icon" type="image/x-icon" sizes="32x32" href="/favicon.ico">
-          <title>My App</title>
-        </head>
-        <body style="text-align: center;">
-          <h1 style="color: #333;">&#9889; Author &#9889;</h1>
-          <p style="color: #34495E;">Iván Rivalcoba Rivas - Web Developer</p>
-          <div>
-            <img width="300px" src="${url_image}" alt="Foto Ivan Rivalcoba">
-          </div>
-        </body>
-      </html>
-      `);
-      res.statusCode = 200;
-      res.end();
-      console.log(`📣 Respondiendo: 200 ${url} ${method}`);
-      break;
+    case "/message":
+      // Verificando si es POST
+      if (method === "POST") {
+        // Se crea una variable para almacenar los datos entrantes del cliente
+        let body = "";
+        
+        // Se registra un manejador de eventos para la recepción de datos
+        req.on("data", (data) => {
+          body += data;
+          if (body.length > 1e6) return req.socket.destroy();
+        });
 
-    case '/favicon.ico':
-      // Petición para el favicon
-      const faviconPath = path.join(__dirname, 'favicon.ico');
-      try {
-        const data = await fs.readFile(faviconPath);
-        res.writeHead(200, { 'Content-Type': 'image/x-icon' });
-        res.end(data);
-      } catch (err) {
-        console.error(err);
-        res.setHeader('Content-Type', 'text/html');
-        res.write(`
-        <html>
-          <head>
-            <link rel="icon" type="image/x-icon" sizes="32x32" href="/favicon.ico">
-            <title>My App</title>
-          </head>
-          <body> 
-            <h1>&#128534; 500 El servidor está fuera de servicio</h1>
-            <p>Lo sentimos, hubo un error en nuestro servidor...</p>
-            <p>${err.message}</p>
-          </body>
-        </html>
-        `);
-        res.statusCode = 500;
+        // Se registra un manejador de eventos para el término de recepción de datos
+        req.on("end", async () => {
+          // Procesa el formulario mediante URLSearchParams
+          const params = new URLSearchParams(body);
+          const parsedParams = Object.fromEntries(params);
+          
+          // Almacenamos en un archivo el mensaje
+          await fs.writeFile('message.txt', parsedParams.message);
+          console.log("📣 Archivo message.txt grabado");
+
+          // Realizamos un redireccionamiento
+          res.statusCode = 302;
+          res.setHeader('Location', '/');
+          // Se finaliza la conexión
+          return res.end();
+        });
+      } else {
+        res.statusCode = 404;
+        res.write("📣 404: Endpoint no encontrado");
         res.end();
-        console.log(`📣 Respondiendo: 500 ${url} ${method}`);
       }
       break;
 
@@ -92,7 +77,6 @@ const server = http.createServer(async (req, res) => {
       res.write(`
       <html>
         <head>
-          <link rel="icon" type="image/x-icon" sizes="32x32" href="/favicon.ico">
           <title>My App</title>
         </head>
         <body> 
