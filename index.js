@@ -31,40 +31,49 @@ const server = http.createServer(async (req, res) => {
       console.log(`📣 Respondiendo: 200 ${url} ${method}`);
       break;
 
-    case '/author':
-      // Petición a la ruta "/author"
-      res.setHeader('Content-Type', 'text/html');
-      let url_image = 'https://media.istockphoto.com/id/180841365/photo/hes-a-handsome-man.jpg?s=612x612&w=0&k=20&c=vjQLLI8g_a0O6_xx0plUu3CJ9AMhnSzHssLwgem8gE4=';
-      res.write(`
-      <html>
-        <head>
-          <title>My App</title>
-        </head>
-        <body style="text-align: center;">
-          <h1 style="color: #333;">&#9889; Author &#9889;</h1>
-          <p style="color: #34495E;">Iván Rivalcoba Rivas - Web Developer</p>
-          <div>
-            <img width="300px" src="${url_image}" alt="Foto Ivan Rivalcoba">
-          </div>
-        </body>
-      </html>
-      `);
-      res.statusCode = 200;
-      res.end();
-      console.log(`📣 Respondiendo: 200 ${url} ${method}`);
-      break;
-
     case "/message":
-      // Verificando si es post
+      // Verificando si es POST
       if (method === "POST") {
-        // Procesa el formulario
-        res.statusCode = 200;
-        res.write("🎉 Endpoint Funcionando!!! 🎉");
+        // Se crea una variable para almacenar los datos entrantes del cliente
+        let body = "";
+        
+        // Se registra un manejador de eventos para la recepción de datos
+        req.on("data", (data) => {
+          body += data;
+          // Limitar el tamaño del cuerpo a 1MB
+          if (body.length > 1e6) return req.socket.destroy();
+        });
+
+        // Se registra un manejador de eventos para el término de recepción de datos
+        req.on("end", () => {
+          // Procesa el formulario
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "text/html");
+          
+          // Mediante URLSearchParams se extraen los campos del formulario
+          const params = new URLSearchParams(body);
+          // Se construye un objeto a partir de los datos en la variable params
+          const parsedParams = Object.fromEntries(params);
+          
+          res.write(`
+          <html>
+            <head>
+              <title>My App</title>
+            </head>
+            <body> 
+              <h1 style="color: #333">SERVER MESSAGE RECEIVED &#128172;</h1>
+              <p>${parsedParams.message}</p>
+            </body>
+          </html>
+          `);
+          // Se finaliza la conexión
+          return res.end();
+        });
       } else {
         res.statusCode = 404;
         res.write("404: Endpoint no encontrado");
+        res.end();
       }
-      res.end();
       break;
 
     default:
