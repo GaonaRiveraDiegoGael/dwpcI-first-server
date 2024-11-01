@@ -1,36 +1,89 @@
-// 1. Importar el módulo http 
 import http from "http";
 
-// 2. Importar el módulo path
-import path from "path";
-
-// 3. Definir las variables globales __dirname y __filename
-global["__dirname"] = path.dirname(new URL(import.meta.url).pathname);
-global["__filename"] = path.basename(new URL(import.meta.url).pathname);
-
-// 4. Crear el servidor 
-// cb (callback) es una *funcion* que se ejecutara 
-// ante cualquier petición de un recurso a nuestro server 
-// (request, response) 
-
 const server = http.createServer((req, res) => {
-  console.log(`📣 url: ${req.url}`);
-  console.log(`📣 method: ${req.method}`);
-  // Estableciendo cabeceras
-  res.setHeader('Content-Type', 'text/html');
-  // Escribiendo la respuesta
-  res.write('<html>');
-  res.write('<head> <title>My App</title></head>');
-  res.write('<body> <h1>Hello from my server</h1></body>');
-  res.write('</html>');
-  // Cerrando la comunicacion
-  res.end();
-});
+  // Desestructurando de "req"
+  let { url, method } = req;
 
-// 5. Se pone a trabajar el servidor 
-// Se le pasa un callback que se ejecutara cuando
-// el servidor empiece a recibir peticiones 
+  console.log(`📣 CLIENT-REQUEST: ${req.url} ${req.method}`);
+
+  // Enrutando peticiones
+  switch (url) {
+    case '/':
+      // Peticion raiz
+      // Estableciendo cabeceras
+      res.setHeader('Content-Type', 'text/html');
+      // Escribiendo la respuesta
+      res.write(`
+      <html>
+        <head>
+          <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/fluency/256/domain.png">
+          <title>My App</title>
+        </head>
+        <body> 
+          <h1 style="color: #333">Hello from my server</h1>
+          <p style="color: #34495E">Estas en el recurso raiz.</p>
+        </body>
+      </html>
+      `);
+      console.log(`📣 Respondiendo: 200 ${req.url} ${req.method}`);
+      // Estableciendo codigo de respuesta
+      res.statusCode = 200;
+      // Cerrando la comunicacion
+      res.end();
+      break;
+    case '/author':
+      // Peticion raiz
+      // Estableciendo cabeceras
+      res.setHeader('Content-Type', 'text/html');
+      let url_image = 'https://media.istockphoto.com/id/180841365/photo/hes-a-handsome-man.jpg?s=612x612&w=0&k=20&c=vjQLLI8g_a0O6_xx0plUu3CJ9AMhnSzHssLwgem8gE4=';
+      // Escribiendo la respuesta
+      res.write(`
+      <html>
+        <head>
+          <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/fluency/256/domain.png">
+          <title>My App</title>
+        </head>
+        <body style="text-align: center;">
+          <h1 style="color: #333;">&#9889; Author &#9889;</h1>
+          <p style="color: #34495E;">Ivan Rivalcoba Rivas - Web Developer</p>
+          <div>
+            <img width="300px" src="https://media.istockphoto.com/id/180841365/photo/hes-a-handsome-man.jpg?s=612x612&w=0&k=20&c=vjQLLI8g_a0O6_xx0plUu3CJ9AMhnSzHssLwgem8gE4=" alt="Foto Ivan Rivalcoba">
+          </div>
+        </body>
+      </html>
+      `);
+      console.log(`📣 Respondiendo: 200 ${url} ${method}`);
+      // Estableciendo codigo de respuesta
+      res.statusCode = 200;
+      // Cerrando la comunicacion
+      res.end();
+      break;
+    default:
+      // Peticion raiz
+      // Estableciendo cabeceras
+      res.setHeader('Content-Type', 'text/html');
+      // Escribiendo la respuesta
+      res.write(`
+      <html>
+        <head>
+          <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/fluency/256/domain.png">
+          <title>My App</title>
+        </head>
+        <body> 
+          <h1>&#128534; 404 Recurso no encontrado</h1>
+          <p>Lo sentimos pero no tenemos lo que buscas...</p>
+        </body>
+      </html>
+      `);
+      console.log(`📣 Respondiendo: 404 ${url} ${method}`);
+      // Estableciendo codigo de respuesta
+      res.statusCode = 404;
+      // Cerrando la comunicacion
+      res.end();
+      break;
+  }
+}); 
 
 server.listen(3000, "0.0.0.0", () => {
   console.log("👩‍🍳 Servidor escuchando en http://localhost:3000"); 
-});  
+});

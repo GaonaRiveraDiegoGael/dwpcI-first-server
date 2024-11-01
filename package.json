@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node ./",
-    "dev": "nodemon index.js", 
+    "dev": "nodemon index.js",
     "test": "echo \"No tests specified\" && exit 1"
   },
   "repository": {
@@ -25,4 +25,3 @@
     "npm": "7.x"
   }
 }
-
